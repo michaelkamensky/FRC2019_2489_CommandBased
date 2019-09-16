@@ -116,8 +116,7 @@ public class OI {
         rightButton10 = new JoystickButton(rightJoystick, 10);
 //      rightButton10.whenPressed(new SolenoidControl(DoubleSolenoid.Value.kReverse  ) ); 
         
-        rightButton2 = new JoystickButton(rightJoystick, 2);
-       // rightButton2.whenPressed(new Punch() ); 
+        rightButton2 = new JoystickButton(rightJoystick, 2); 
         
         // SmartDashboard Buttons
         SmartDashboard.putData("Autonomous Command", new AutonomousCommand());

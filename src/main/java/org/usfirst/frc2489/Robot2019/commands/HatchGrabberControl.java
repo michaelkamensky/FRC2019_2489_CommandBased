@@ -8,18 +8,18 @@ import edu.wpi.first.wpilibj.command.Command;
 /**
  *
  */
-public class SolenoidControl extends Command {
+public class HatchGrabberControl extends Command {
 	private DoubleSolenoid.Value value;
-    public SolenoidControl(DoubleSolenoid.Value v) {
+    public HatchGrabberControl(DoubleSolenoid.Value v) {
     	value = v;
         // Use requires() here to declare subsystem dependencies
         // eg. requires(chassis);
-    	requires(Robot.pneumatics);
+    	requires(Robot.hatchGrabber);
     }
 
     // Called just before this Command runs the first time
     protected void initialize() {
-    	Robot.pneumatics.setSolenoid1(value);
+    	Robot.hatchGrabber.setSolenoid1(value);
     }
 
     // Called repeatedly when this Command is scheduled to run

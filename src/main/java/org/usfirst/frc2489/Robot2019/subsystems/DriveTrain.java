@@ -61,6 +61,7 @@ public class DriveTrain extends Subsystem {
     
    // private final ArduinoI2C aI2C = RobotMap.aI2C;
     
+	/*
     private final Sonar leftSonar = RobotMap.leftSonar;
     private final Sonar rightSonar = RobotMap.rightSonar;    
     
@@ -72,7 +73,7 @@ public class DriveTrain extends Subsystem {
     private final DigitalInput rightLine = RobotMap.rightLine;
     
     private final Gyro gyro = RobotMap.gyro;
- 
+    */
     private final JeVoisInterface ji = RobotMap.ji;
     
     @Override
@@ -173,9 +174,9 @@ public class DriveTrain extends Subsystem {
     public void stop() {
     	drive(0, 0);
     }
-    public double getAngle(){
-    	//double angle = ahrs.getAngle();
-    	double angle = gyro.getAngle();
+	public double getAngle(){
+    	double angle = ahrs.getAngle();
+    	//double angle = gyro.getAngle();
     	return angle;
     }
     public int aI2CRead() {
@@ -200,26 +201,34 @@ public class DriveTrain extends Subsystem {
     		return -1;
     	}
     }
-    public double getLeftSonar() {
-    	return leftSonar.getDistance();
+    
+	public double getLeftSonar() {
+    	// return leftSonar.getDistance();
+		return 0;
     } 
     public double getRightSonar() {
-    	return rightSonar.getDistance();
+    	// return rightSonar.getDistance();
+		return 0;
     }
     public boolean getLeftRange() {
-    	return leftRange.get();
+    	// return leftRange.get();
+		return false;
     }
     public boolean getRightRange() {
-    	return rightRange.get();
+    	// return rightRange.get();
+		return false;
     }
     public boolean getLeftLine() {
-    	return !leftLine.get();
+    	// return !leftLine.get();
+		return false;
     }
     public boolean getCenterLine() {
-    	return !centerLine.get();
+    	// return !centerLine.get();
+		return false;
     }
     public boolean getRightLine() {
-    	return !rightLine.get();    
+    	// return !rightLine.get();
+		return false;    
     }
 }
 

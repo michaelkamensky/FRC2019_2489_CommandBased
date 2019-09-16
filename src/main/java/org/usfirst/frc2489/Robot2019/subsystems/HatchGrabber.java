@@ -10,10 +10,10 @@ import edu.wpi.first.wpilibj.command.Subsystem;
 /**
  *
  */
-public class Pneumatics extends Subsystem {
-	 private final Compressor compressor = RobotMap.pneumaticsCompressor;
+public class HatchGrabber extends Subsystem {
+	 // private final Compressor compressor = RobotMap.pneumaticsCompressor;
 	 private final DoubleSolenoid doubleSolenoid1 = RobotMap.pneumaticsDoubleSolenoid1;
-	 private final DigitalInput limitSwitch1 = RobotMap.pneumaticsLimitSwitch1;
+	 // private final DigitalInput limitSwitch1 = RobotMap.pneumaticsLimitSwitch1;
 
     // Put methods for controlling this subsystem
     // here. Call these from Commands.
@@ -27,9 +27,11 @@ public class Pneumatics extends Subsystem {
     	doubleSolenoid1.set(v);
     	
     }
+    /*
     public boolean getLimitSwitch() {
     	return limitSwitch1.get();
     }
+    */
 }
 
 
