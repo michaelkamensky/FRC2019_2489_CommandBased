@@ -202,6 +202,15 @@ public class DriveTrain extends Subsystem {
     	}
     }
     
+	public VisionTarget getVisionTarget() {
+        ArrayList<VisionTarget> vt = ji.getVisionTargets();
+        if (vt != null) {
+            return vt.get(0);
+        } else {
+            return null;
+        }
+    }
+
 	public double getLeftSonar() {
     	// return leftSonar.getDistance();
 		return 0;

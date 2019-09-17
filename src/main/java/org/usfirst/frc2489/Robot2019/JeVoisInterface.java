@@ -33,7 +33,7 @@ public class JeVoisInterface {
 
     private static final int TARGET_FIELDS_NUM = 5;
 
-    private static final int debug = 10;
+    private static final int debug = 0;
     
     // Confgure the camera to stream debug images or not.
     private boolean broadcastUSBCam = false;
@@ -43,16 +43,18 @@ public class JeVoisInterface {
     
     // When streaming, use this set of configuration
     // high resolution
-    private static final int STREAM_WIDTH_PX = 640;
-    private static final int STREAM_HEIGHT_PX = 480;
-    private static final int STREAM_RATE_FPS = 15;
+    // public static final int STREAM_WIDTH_PX = 640;
+    // public static final int STREAM_HEIGHT_PX = 480;
+    // public static final int STREAM_RATE_FPS = 15;
 
-    // low resolution
-    // private static final int STREAM_WIDTH_PX = 320;
-    // private static final int STREAM_HEIGHT_PX = 240;
-    // private static final int STREAM_RATE_FPS = 15;
+    // low resolution used as base VIDEO_SCALE=1
+    public static final int STREAM_WIDTH_PX = 320;
+    public static final int STREAM_HEIGHT_PX = 240;
+    public static final int STREAM_RATE_FPS = 15;
     
-    private static final int THREAD_SLEEP_INTERVAL = 20; //ms
+    public static final int VIDEO_SCALE = 2;
+
+    private static final int THREAD_SLEEP_INTERVAL = 50; //ms
     
     // Serial port used for getting target data from JeVois 
     private SerialPort visionPort = null;
@@ -78,6 +80,10 @@ public class JeVoisInterface {
     private double packetRxRatePPS = 0;
     
     private ArrayList<VisionTarget> visionTargets = null;
+
+    private boolean currentIsVisionMode = true;
+    private boolean humanModeRequested = false;
+    private boolean visionModeRequested = false;
 
     //=======================================================
     //== BEGIN PUBLIC INTERFACE
@@ -177,6 +183,10 @@ public class JeVoisInterface {
         }
     }
     
+    public synchronized void setCamVisionProcModeAsync() {
+        visionModeRequested = true;
+    }
+
     /**
      * Send parameters to the camera to configure it for a human-readable image
      */
@@ -184,6 +194,10 @@ public class JeVoisInterface {
         if (visionPort != null){
             sendCmdAndCheck("setcam autoexp 0"); //Enable AutoExposure
         }
+    }
+
+    public synchronized void setCamHumanDriverModeAsync() {
+        humanModeRequested = true;
     }
 
     /*
@@ -319,15 +333,19 @@ public class JeVoisInterface {
             if (debug >= 1) {
                 System.out.print("Starting JeVois Cam Stream...");
             }
-            
-            visionCam = CameraServer.getInstance().startAutomaticCapture("JeVois Camera", 0);
+            // visionCam = CameraServer.getInstance().startAutomaticCapture("JeVois Camera", 1);
+            visionCam = CameraServer.getInstance().startAutomaticCapture(1);
             // two possible formats PixelFormat.kBGR and PixelFormat.kMJPEG
-            visionCam.setVideoMode(PixelFormat.kMJPEG , STREAM_WIDTH_PX, STREAM_HEIGHT_PX, STREAM_RATE_FPS);
-            
+            visionCam.setVideoMode(PixelFormat.kMJPEG ,
+                                   STREAM_WIDTH_PX * VIDEO_SCALE,
+                                   STREAM_HEIGHT_PX * VIDEO_SCALE,
+                                   STREAM_RATE_FPS);
+
             // visionCam = new UsbCamera("VisionProcCam", 0);
             // visionCam.setVideoMode(PixelFormat.kBGR , STREAM_WIDTH_PX, STREAM_HEIGHT_PX, STREAM_RATE_FPS);
             // camServer = new MjpegServer("VisionCamServer", MJPG_STREAM_PORT);
             // camServer.setSource(visionCam);
+
             camStreamRunning = true;
             dataStreamRunning = true;
             if (debug >= 1) {
@@ -586,16 +604,19 @@ public class JeVoisInterface {
             }
         }
 
-        if (retval == 0) {
-        	synchronized(this) {
-        		visionTargets = currentVisionTargets;
-        	}
-        } else {
+        synchronized(this) {
+            if (retval == 0) {
+                visionTargets = currentVisionTargets;
+            } else {
+                visionTargets = null;
+            }
+        }
+
+        if (retval != 0) {
           if (debug >= 10) {
               System.out.println("parsePacket: got error: " + retval);
           }
         }
-          
         
         return retval;        
     }
@@ -606,12 +627,12 @@ public class JeVoisInterface {
 
     private void driverStationReportError(String error, boolean printTrace) {
         DriverStation.reportError(error, printTrace);
-        System.out.println("DriverStation ERROR:" + error);
+        // System.out.println("DriverStation ERROR:" + error);
     }
 
     private void driverStationReportWarning(java.lang.String error, boolean printTrace) {
         DriverStation.reportWarning(error, printTrace);
-        System.out.println("DriverStation WARNING:" + error);
+        // System.out.println("DriverStation WARNING:" + error);
     }
 
     private double timerGetFPGATimestamp() {
@@ -624,11 +645,51 @@ public class JeVoisInterface {
      */
     Thread packetListenerThread = new Thread(new Runnable(){
         public void run(){
-        	while(!Thread.interrupted()){
-        		backgroundUpdate();
-                        // sleep for 5ms, i.e update with 20 fps
+            try {
+                while(!Thread.interrupted()){
+                    boolean doVisionMode = true;
+                    boolean doSwitchToVision = false;
+                    boolean doSwitchToHuman = false;
+
+                    synchronized(this) {
+                        if (humanModeRequested) {
+                            if (currentIsVisionMode) {
+                                doSwitchToHuman = true;
+                                currentIsVisionMode = false;
+                            }
+                        }
+                        if (visionModeRequested) {
+                            if (!currentIsVisionMode) {
+                                doSwitchToVision = true;
+                                currentIsVisionMode = true;
+                            }
+                        }
+                        humanModeRequested = false;
+                        visionModeRequested = false;
+
+                        doVisionMode = currentIsVisionMode;
+                    }
+
+                    if (doSwitchToHuman) {
+                        setCamHumanDriverMode();
+                    }
+                    if (doSwitchToVision) {
+                        setCamVisionProcMode();
+                    }
+                    if (doVisionMode) {
+        		        backgroundUpdate();
+                        // sleep for 20ms, i.e update with 50 fps
                         sleep(THREAD_SLEEP_INTERVAL);
-        	}
+                    } else {
+                        // Human Output on Camera check if status changes
+                        sleep(THREAD_SLEEP_INTERVAL * 5);
+                    }
+                }
+            } catch (Exception ex) {
+                synchronized(this) {
+                    visionTargets = null;
+                }
+            }
         }
     });
 }
