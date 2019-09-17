@@ -52,6 +52,8 @@ public class RobotMap {
     public static ArduinoI2C aI2C;
     public static Spark lightPower;
     
+    public static WPI_TalonSRX armTalonSRX;
+
     //public static Sonar leftSonar;
     //public static Sonar rightSonar;
     
@@ -112,6 +114,8 @@ public class RobotMap {
         lightPower = new Spark(0);
         lightPower.set(1.0);
         
+        armTalonSRX = new WPI_TalonSRX(1);
+
         //leftSonar = new Sonar(1);
         //LiveWindow.addSensor("DriveTrain", "Left Sonar", leftSonar);
         //rightSonar = new Sonar(2);
