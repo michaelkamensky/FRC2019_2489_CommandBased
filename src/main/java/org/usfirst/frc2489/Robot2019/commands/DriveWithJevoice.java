@@ -53,6 +53,7 @@ public class DriveWithJevoice extends Command {
     // Called repeatedly when this Command is scheduled to run
     protected void execute() {
         VisionTarget vt = null;
+        vt = Robot.driveTrain.getVisionTarget();
 
         if (vt != null) {
             int center = vt.x;

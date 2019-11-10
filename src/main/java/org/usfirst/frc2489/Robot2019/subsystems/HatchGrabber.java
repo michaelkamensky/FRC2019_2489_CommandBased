@@ -24,9 +24,16 @@ public class HatchGrabber extends Subsystem {
     	
     }
     public void setSolenoid1(DoubleSolenoid.Value v){
-    	doubleSolenoid1.set(v);
-    	
+    	doubleSolenoid1.set(v);	
     }
+
+    public void grab(){
+        doubleSolenoid1.set(DoubleSolenoid.Value.kForward);	
+    }
+
+    public void release(){
+        doubleSolenoid1.set(DoubleSolenoid.Value.kReverse);
+    }   
     /*
     public boolean getLimitSwitch() {
     	return limitSwitch1.get();

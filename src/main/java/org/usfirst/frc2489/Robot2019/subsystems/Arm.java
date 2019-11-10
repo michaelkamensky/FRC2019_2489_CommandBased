@@ -16,9 +16,7 @@ public class Arm extends Subsystem {
     // here. Call these from Commands.
 
     public void initDefaultCommand() {
-        setDefaultCommand(new ArmWithJoystick());
-        
-    	
+        //setDefaultCommand(new ArmWithJoystick());	
     }
     public void move(double power){
     	armTalonSRX.set(ControlMode.PercentOutput, power);  	
